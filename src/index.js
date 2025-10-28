@@ -77,6 +77,11 @@ async function uploadFileToOneDrive(accessToken, fileData) {
 }
 
 function findRowByID(worksheet, candidateID) {
+    if (!worksheet) {
+        console.error('Error: Worksheet is undefined in findRowByID');
+        return null;
+    }
+
     let targetRow = null;
 
     worksheet.eachRow((row, rowNumber) => {
@@ -131,7 +136,17 @@ async function update_excel(items) {
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(fileData);
-    const worksheet = workbook.getWorksheet(1);
+    
+    let worksheet = workbook.getWorksheet(1);
+    
+    if (!worksheet && workbook.worksheets.length > 0) {
+        worksheet = workbook.worksheets[0];
+    }
+    
+    if (!worksheet) {
+        console.error('Error: Worksheet not found. Available worksheets:', workbook.worksheets.map(w => w.name));
+        return;
+    }
 
     for (const elem of items) {
         const row = findRowByID(worksheet, elem.id);
